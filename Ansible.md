@@ -19,10 +19,12 @@ $ export ANSIBLE GATHERING=exp1icit
 /opt/web-playbooks/ansible. cfg
 gathering = explicit
 
-  <h>View Configuration</h2>
+ *View Configuration*
+ ```bash
 $ ansible-config list # Lists all configurations
 $ ansible-config view # Shows the current config file
 $ ansible-config dump # Shows the current settings
 $ export ANSIBLE GATHERING=exp1icit
 ansible-config dump | grep GATHERING
+```
 
