@@ -15,7 +15,7 @@ $ ANSIBLE_GATHERING=exp1icit ansible-playbook playbook. yml #For this cmd execut
 $ export ANSIBLE GATHERING=exp1icit
 
 #For Persistent across sessions and users
-$ ansible-playbook playbook.yml
+>$ ansible-playbook playbook.yml
 /opt/web-playbooks/ansible. cfg
 gathering = explicit
 
