@@ -17,8 +17,10 @@
 #### For Persistent across sessions and users
 `ansible-playbook playbook.yml`
 
-```/opt/web-playbooks/ansible.cfg
-gathering = explicit```
+```
+/opt/web-playbooks/ansible.cfg
+gathering = explicit
+```
 
 ## View Configuration
  ```bash
