@@ -9,10 +9,10 @@
 
 ## Ansible Configuration Variables
 #### For this cmd execution only
-`ANSIBLE_GATHERING=exp1icit ansible-playbook playbook.yml`
+`ANSIBLE_GATHERING=explicit ansible-playbook playbook.yml`
 
 #### For the current shell session
-`export ANSIBLE GATHERING=exp1icit`
+`export ANSIBLE GATHERING=explicit`
 
 #### For Persistent across sessions and users
 `ansible-playbook playbook.yml`
@@ -30,4 +30,6 @@ $ ansible-config dump # Shows the current settings
 $ export ANSIBLE GATHERING=exp1icit
 ansible-config dump | grep GATHERING
 ```
+
+Two types of Inventory formats are *.ini* and *.yaml*
 
