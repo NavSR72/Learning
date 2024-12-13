@@ -18,7 +18,7 @@
 `ansible-playbook playbook.yml`
 
 ```/opt/web-playbooks/ansible.cfg
-```gathering = explicit```
+gathering = explicit```
 
 ## View Configuration
  ```bash
