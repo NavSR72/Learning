@@ -28,7 +28,7 @@ Linux File Types
           
           To find socket files in your system
           
-          ```find / -type s```
+          `find / -type s`
           
           Output will be like
      
