@@ -1,0 +1,82 @@
+1.Keep both Java versions same.
+openjdk 11.0.23 2024-04-16 LTS
+ 
+2. Install the correct version of Jenkins on new machine. It should match the one used on the instance you are migrating from.
+Jenkins 2.414.3
+After Installing, Enter Initial password and install recommended plugins.
+ 
+3. Migrate the startup Java arguments from the old instance to the new one. You can find the relevant file paths for your product here.
+ 
+Starting with version 2.303.2.3 or newer, you can use the following array-based syntax
+vi /etc/sysconfig/jenkins
+ 
+JENKINS_JAVA_OPTIONS=("-Djava.awt.headless=true")
+JENKINS_JAVA_OPTIONS+=("-Xms2048m")
+JENKINS_JAVA_OPTIONS+=("-Xmx2048m")
+ 
+This array-based syntax is the recommended syntax as it is simpler to comment out individual arguments if required, and comparing differences with backups of the file are simpler.
+ 
+If running a product version older than 2.303.2.3 use the previous syntax:
+JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true -Xms2048m -Xmx2048m"
+ 
+INFO: Agent config lives in jenkins Home.
+ 
+4.If Inbound Agents are there, need to reconfigure them.
+ 
+5.Stop Jenkins in new Server.
+systemctl stop jenkins
+systemctl disable jenkins
+ 
+6.In New instance backup Jenkins Home Dir# This is because if we installation failed we can use the jenkinsorg
+mv jenkins jenkinsorg
+ 
+7.Stop Jenkins in Old Server.
+systemctl stop jenkins
+systemctl disable jenkins
+ 
+8.backup Old Jenkins Home
+tar zcvf jenkins_home.tar.gz jenkins
+ 
+9.Verify Backup
+tar tvf jenkins_home.tar.gz
+ 
+10.Copy to new Server
+scp jenkins_home.tar.gz p-acc@newjenkins:/data/
+Rsync also can be used.
+ 
+11.Extract tar ball
+tar zxvf /data/jenkins_home.tar.gz
+ 
+12.Change owner permissions
+chown -R jenkins: jenkins
+ 
+13.Systemctl edit jenkins(Optional)
+Increase xms ans xmx
+ 
+14.Check (and edit, if needed) config.xml for URL specific options. Remove any settings which contains references to the Source URL.
+ 
+15.Start the new instance using Quiet start.
+INFO: https://docs.cloudbees.com/docs/cloudbees-ci/latest/traditional-admin-guide/quiet-start
+Create a file named quiet-start.groovy and place it in the $JENKINS_HOME/init.groovy.d/ directory. You may have to create this directory if it does not already exist. The file should contain the following:
+import jenkins.model.Jenkins
+ 
+// Go into quiet mode
+Jenkins.instance.doQuietDown()
+ 
+https://docs.cloudbees.com/docs/cloudbees-ci-kb/latest/client-and-managed-controllers/how-can-i-prevent-jenkins-from-starting-new-jobs-after-a-restart
+ 
+16. Navigate to ‘Manage Jenkins’ -> ‘Configure System’ and ‘Configure Security’ and update any settings as needed. Some settings (such as the Jenkins URL) are specific to each instance, and may need to be re-configured for your destination instance.
+ 
+17.Uncheck the Quiet start. You can toggle this via the URLs /quietDown and /cancelQuietDown. e.g: https://<jenkins-url>/cancelQuietDown. If you are not using a CloudBees distributed release, you will not have access to the Quiet Start Plugin, instead refer to this article.
+ 
+##Start Jenkins
+systemctl restart jenkins
+##Enable systemd service
+systemctl enable jenkins
+ 
+16. configure nginx
+ 
+17. Configure system
+go to Manage Jenkins > Configure system, then find “Jenkins URL” and fill in the url.
+do configure “SSH Server”, too.
+ 
