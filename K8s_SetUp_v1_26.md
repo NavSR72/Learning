@@ -155,3 +155,112 @@ Expected output:
 STATUS   ROLES           AGE   VERSION
 Ready    control-plane   xxm   v1.26.1
 ```
+
+
+Extras
+---
+
+# ✅ Create a Service Account & Generate Its Kubeconfig
+
+## 1️⃣ Create a Service Account
+
+```bash
+kubectl create serviceaccount my-service-account -n default
+```
+
+---
+
+## 2️⃣ Assign Permissions (Example: Read-Only Access)
+
+```bash
+kubectl create clusterrolebinding my-sa-view-binding \
+  --clusterrole=view \
+  --serviceaccount=default:my-service-account
+```
+
+---
+
+## 3️⃣ Create a Token Secret (Required for K8s v1.24+)
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-service-account-secret
+  annotations:
+    kubernetes.io/service-account.name: my-service-account
+type: kubernetes.io/service-account-token
+EOF
+```
+
+Wait a few seconds for Kubernetes to populate the token.
+
+---
+
+## 4️⃣ Get the Secret Name
+
+```bash
+secretName=$(kubectl get sa my-service-account -n default -o jsonpath='{.secrets[0].name}')
+```
+
+---
+
+## 5️⃣ Extract Token, CA, and Namespace
+
+```bash
+ca=$(kubectl get secret $secretName -n default -o jsonpath='{.data.ca\.crt}')
+token=$(kubectl get secret $secretName -n default -o jsonpath='{.data.token}' | base64 --decode)
+namespace=$(kubectl get secret $secretName -n default -o jsonpath='{.data.namespace}' | base64 --decode)
+```
+
+---
+
+## 6️⃣ Define Variables
+
+Replace the server URL with your API server endpoint:
+
+```bash
+server=$(kubectl config view -o jsonpath='{.clusters[0].cluster.server}')
+clusterName=$(kubectl config view -o jsonpath='{.clusters[0].name}')
+serviceAccount=my-service-account
+```
+
+---
+
+## 7️⃣ Generate the kubeconfig File
+
+```bash
+cat <<EOF > sa.kubeconfig
+apiVersion: v1
+kind: Config
+clusters:
+- name: ${clusterName}
+  cluster:
+    certificate-authority-data: ${ca}
+    server: ${server}
+contexts:
+- name: ${serviceAccount}@${clusterName}
+  context:
+    cluster: ${clusterName}
+    namespace: ${namespace}
+    user: ${serviceAccount}
+users:
+- name: ${serviceAccount}
+  user:
+    token: ${token}
+current-context: ${serviceAccount}@${clusterName}
+EOF
+```
+
+---
+
+## ✅ Usage
+
+Test access:
+
+```bash
+KUBECONFIG=sa.kubeconfig kubectl get pods
+```
+
+---
